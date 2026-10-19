@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Shorts Switcher",
+  "version": "1.1.0",
+  "description": "Автоматически переключает YouTube Shorts после окончания ролика.",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Shorts Switcher",
+    "default_popup": "popup.html"
+  },
+  "minimum_chrome_version": "95"
+}

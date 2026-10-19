@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const extensionApi = globalThis.browser ?? globalThis.chrome;
+
   let enabled = false;
   let activeVideo = null;
   let completed = false;
@@ -100,14 +102,14 @@
     if (video.ended) nextShort();
   }
 
-  browser.storage.onChanged.addListener((changes, area) => {
+  extensionApi.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.enabled) {
       enabled = changes.enabled.newValue !== false;
       completed = false;
       refresh();
     }
   });
-  browser.storage.local.get({enabled: true}).then(settings => {
+  extensionApi.storage.local.get({enabled: true}).then(settings => {
     enabled = settings.enabled;
     refresh();
   }).catch(console.error);

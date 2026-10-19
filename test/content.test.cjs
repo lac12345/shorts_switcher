@@ -28,7 +28,7 @@ async function setup(pathname = '/shorts/first', options = {}) {
       querySelector: selector => selector === (options.buttonSelector || '#navigation-button-down button')
         ? button : null
     },
-    browser: {storage: {
+    [options.apiName || 'browser']: {storage: {
       local: {get: async () => ({enabled: true})},
       onChanged: {addListener: fn => {change = fn;}}
     }},
@@ -107,4 +107,14 @@ test('paused video does not advance on time changes', async () => {
   app.video.currentTime = 9.8; app.emit('timeupdate');
   app.video.paused = true; app.video.currentTime = 0; app.emit('timeupdate');
   assert.equal(app.clicks(), 0);
+});
+
+
+test('Chromium chrome.storage API supports switching and disabling', async () => {
+  const app = await setup('/shorts/first', {apiName: 'chrome'});
+  app.emit('ended');
+  assert.equal(app.clicks(), 1);
+  app.location.pathname = '/shorts/second'; app.refresh();
+  app.enable(false); app.emit('ended');
+  assert.equal(app.clicks(), 1);
 });
