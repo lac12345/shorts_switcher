@@ -1,19 +1,35 @@
 {
   "manifest_version": 2,
   "name": "Shorts Switcher",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Автоматически переключает YouTube Shorts после окончания ролика.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "browser_action": {
     "default_title": "Shorts Switcher",
     "default_popup": "popup.html"
   },
-  "content_scripts": [{
-    "matches": ["https://www.youtube.com/*"],
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
   "browser_specific_settings": {
-    "gecko": {"id": "shorts-switcher@example.org", "strict_min_version": "109.0"}
+    "gecko": {
+      "id": "shorts-switcher@example.org",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
   }
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Shorts Switcher",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Автоматически переключает YouTube Shorts после окончания ролика.",
   "permissions": [
     "storage"
