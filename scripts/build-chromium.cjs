@@ -1,7 +1,7 @@
 // Keep a ready-to-load Chromium build in the repository for ZIP downloads.
 const fs = require('node:fs');
 const path = require('node:path');
-const source = path.join(__dirname, '../extension');
+const source = path.join(__dirname, '../extension-firefox');
 const target = path.join(__dirname, '../extension-chromium');
 fs.mkdirSync(target, {recursive: true});
 const manifest = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));

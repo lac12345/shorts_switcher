@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const source = fs.readFileSync(path.join(__dirname, '../extension/content.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../extension-firefox/content.js'), 'utf8');
 
 async function setup(pathname = '/shorts/first', options = {}) {
   const handlers = new Map();
