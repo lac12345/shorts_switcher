@@ -5,19 +5,29 @@ const fs = require('node:fs');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../extension/content.js'), 'utf8');
 
-async function setup(pathname = '/shorts/first') {
+async function setup(pathname = '/shorts/first', options = {}) {
   const handlers = new Map();
   let clicks = 0, refresh, change;
+  const button = {click: () => clicks++, getAttribute: () => null,
+    getClientRects: () => options.hiddenButton ? [] : [{}]};
+  const renderer = {nextElementSibling: options.nextRenderer ? {
+    matches: () => true, scrollIntoView: () => clicks++
+  } : null};
   const video = {
-    currentTime: 0, duration: 10, seeking: false,
+    currentTime: 0, duration: 10, seeking: false, paused: false,
+    closest: () => renderer,
+    getBoundingClientRect: () => ({width: 300, height: 600, top: 0, bottom: 600, left: 0, right: 300}),
     addEventListener: (name, fn) => handlers.set(name, fn),
     removeEventListener: name => handlers.delete(name)
   };
   const location = {pathname};
   vm.runInNewContext(source, {
-    location, console,
-    document: {querySelector: selector => selector.includes('[is-active]')
-      ? {querySelector: () => video} : {click: () => clicks++, getAttribute: () => null}},
+    location, console, innerHeight: 900, innerWidth: 1200,
+    document: {
+      querySelectorAll: selector => selector === 'video' ? [video] : [],
+      querySelector: selector => selector === (options.buttonSelector || '#navigation-button-down button')
+        ? button : null
+    },
     browser: {storage: {
       local: {get: async () => ({enabled: true})},
       onChanged: {addListener: fn => {change = fn;}}
@@ -64,9 +74,37 @@ test('ordinary videos ignored; client navigation activates Shorts only', async (
   assert.equal(app.handlers.size, 0);
 });
 
-test('seeking does not trigger a loop transition', async () => {
+test('seeking from the middle does not trigger a loop transition', async () => {
+  const app = await setup();
+  app.video.currentTime = 5; app.emit('timeupdate');
+  app.video.seeking = true; app.video.currentTime = 0; app.emit('timeupdate');
+  assert.equal(app.clicks(), 0);
+});
+
+
+test('loop reset while seeking is detected without losing the final playback time', async () => {
+  const app = await setup();
+  app.video.currentTime = 9.6; app.emit('timeupdate');
+  app.video.currentTime = 0; app.video.seeking = true; app.emit('timeupdate');
+  app.video.seeking = false; app.emit('seeked');
+  assert.equal(app.clicks(), 1);
+});
+
+test('supports a player outside ytd-shorts and newer navigation ID', async () => {
+  const app = await setup('/shorts/first', {buttonSelector: '#shorts-navigation-button-down button'});
+  app.emit('ended');
+  assert.equal(app.clicks(), 1);
+});
+
+test('hidden navigation uses next renderer scrolling', async () => {
+  const app = await setup('/shorts/first', {hiddenButton: true, nextRenderer: true});
+  app.emit('ended');
+  assert.equal(app.clicks(), 1);
+});
+
+test('paused video does not advance on time changes', async () => {
   const app = await setup();
   app.video.currentTime = 9.8; app.emit('timeupdate');
-  app.video.seeking = true; app.video.currentTime = 0; app.emit('timeupdate');
+  app.video.paused = true; app.video.currentTime = 0; app.emit('timeupdate');
   assert.equal(app.clicks(), 0);
 });
